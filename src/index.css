@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply bg-gray-900 text-gray-100;
+    }
+}
+
+@layer components {
+    .pixel-button {
+        image-rendering: pixelated;
+        box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.4);
+    }
+
+    .pixel-button:active {
+        transform: translateY(2px);
+        box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.4);
+    }
+}
