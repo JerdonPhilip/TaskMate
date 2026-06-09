@@ -8,7 +8,6 @@ interface TaskState {
   tasks: Task[];
   questLog: QuestLogEntry[];
   
-  // Actions
   addTask: (data: TaskFormData) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
   deleteTask: (id: string) => void;
@@ -139,9 +138,14 @@ export const useTaskStore = create<TaskState>()(
           ],
         }));
 
+        // Dispatch event with both XP and Gold
         window.dispatchEvent(
           new CustomEvent('task-completed', {
-            detail: { taskId, xpReward: task.xpReward, goldReward: task.goldReward },
+            detail: { 
+              taskId, 
+              xpReward: task.xpReward, 
+              goldReward: task.goldReward 
+            },
           })
         );
       },

@@ -1,43 +1,46 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { User, CharacterClass } from '../types/user';
+import { User, CharacterClass, UserStats } from '../types/user';
 import { generateId } from '../utils/uuid';
 import { levelThresholds, getLevelForXP, getTitleForLevel } from '../utils/levelThresholds';
+import { CLASS_CONFIGS } from '../utils/classStats';
 
 interface UserState {
   user: User | null;
   
   initializeUser: (name: string, characterClass: CharacterClass) => void;
   addXP: (amount: number, source: string, taskId?: string) => void;
-  completeTask: (taskId: string, xpReward: number) => void;
+  addGold: (amount: number) => void;
+  completeTask: (taskId: string, xpReward: number, goldReward: number) => void;
+  allocateStatPoint: (stat: keyof UserStats) => void;
   checkLevelUp: () => { leveledUp: boolean; newLevel?: number } | null;
   resetCharacter: () => void;
   getXPToNextLevel: () => number;
   getLevelProgress: () => number;
 }
 
-const createDefaultUser = (name: string, characterClass: CharacterClass): User => ({
-  id: generateId(),
-  name,
-  level: 1,
-  currentXP: 0,
-  totalXP: 0,
-  class: characterClass,
-  title: 'novice',
-  stats: {
-    strength: characterClass === 'warrior' ? 8 : characterClass === 'cleric' ? 6 : 4,
-    intelligence: characterClass === 'mage' ? 8 : characterClass === 'cleric' ? 6 : 4,
-    agility: characterClass === 'rogue' ? 8 : characterClass === 'warrior' ? 6 : 4,
-    wisdom: characterClass === 'cleric' ? 8 : characterClass === 'mage' ? 6 : 4,
-  },
-  achievements: [],
-  questsCompleted: 0,
-  questsFailed: 0,
-  streaks: {
-    currentStreak: 0,
-    longestStreak: 0,
-  },
-});
+const createDefaultUser = (name: string, characterClass: CharacterClass): User => {
+  const classConfig = CLASS_CONFIGS[characterClass];
+  return {
+    id: generateId(),
+    name,
+    level: 1,
+    currentXP: 0,
+    totalXP: 0,
+    gold: 0,
+    class: characterClass,
+    title: 'novice',
+    stats: { ...classConfig.baseStats },
+    statPoints: 0, // Start with 0 stat points
+    achievements: [],
+    questsCompleted: 0,
+    questsFailed: 0,
+    streaks: {
+      currentStreak: 0,
+      longestStreak: 0,
+    },
+  };
+};
 
 export const useUserStore = create<UserState>()(
   persist(
@@ -59,6 +62,10 @@ export const useUserStore = create<UserState>()(
           const newLevel = getLevelForXP(newTotalXP);
           const leveledUp = newLevel > state.user.level;
 
+          // Calculate stat points gained (2 points per level up)
+          const levelsGained = newLevel - state.user.level;
+          const newStatPoints = levelsGained > 0 ? state.user.statPoints + (levelsGained * 2) : state.user.statPoints;
+
           return {
             user: {
               ...state.user,
@@ -66,18 +73,25 @@ export const useUserStore = create<UserState>()(
               totalXP: newTotalXP,
               level: newLevel,
               title: getTitleForLevel(newLevel),
-              ...(leveledUp && {
-                stats: {
-                  ...state.user.stats,
-                  [getRandomStat()]: state.user.stats[getRandomStat()] + 1,
-                },
-              }),
+              statPoints: newStatPoints,
             },
           };
         });
       },
 
-      completeTask: (taskId, xpReward) => {
+      addGold: (amount) => {
+        set((state) => {
+          if (!state.user) return state;
+          return {
+            user: {
+              ...state.user,
+              gold: state.user.gold + amount,
+            },
+          };
+        });
+      },
+
+      completeTask: (taskId, xpReward, goldReward) => {
         set((state) => {
           if (!state.user) return state;
 
@@ -95,21 +109,62 @@ export const useUserStore = create<UserState>()(
             newStreak = 1;
           }
 
-          const streakBonus = Math.floor(xpReward * (newStreak * 0.1));
+          const streakBonus = Math.floor((xpReward + goldReward) * (newStreak * 0.1));
           const totalXP = xpReward + streakBonus;
+          const totalGold = goldReward + Math.floor(streakBonus / 2);
+
+          const newTotalXP = state.user.totalXP + totalXP;
+          const newLevel = getLevelForXP(newTotalXP);
+          const levelsGained = newLevel - state.user.level;
+          const newStatPoints = levelsGained > 0 ? state.user.statPoints + (levelsGained * 2) : state.user.statPoints;
+
+          // Auto-allocate stats based on class growth when leveling up
+          let updatedStats = { ...state.user.stats };
+          if (levelsGained > 0) {
+            const classConfig = CLASS_CONFIGS[state.user.class];
+            for (let i = 0; i < levelsGained; i++) {
+              updatedStats = {
+                strength: updatedStats.strength + classConfig.statGrowthPerLevel.strength,
+                intelligence: updatedStats.intelligence + classConfig.statGrowthPerLevel.intelligence,
+                agility: updatedStats.agility + classConfig.statGrowthPerLevel.agility,
+                wisdom: updatedStats.wisdom + classConfig.statGrowthPerLevel.wisdom,
+              };
+            }
+          }
 
           return {
             user: {
               ...state.user,
               questsCompleted: state.user.questsCompleted + 1,
               currentXP: state.user.currentXP + totalXP,
-              totalXP: state.user.totalXP + totalXP,
-              level: getLevelForXP(state.user.totalXP + totalXP),
-              title: getTitleForLevel(getLevelForXP(state.user.totalXP + totalXP)),
+              totalXP: newTotalXP,
+              gold: state.user.gold + totalGold,
+              level: newLevel,
+              title: getTitleForLevel(newLevel),
+              stats: updatedStats,
+              statPoints: newStatPoints,
               streaks: {
                 currentStreak: newStreak,
                 longestStreak: Math.max(newStreak, state.user.streaks.longestStreak),
                 lastCompletedDate: today,
+              },
+            },
+          };
+        });
+      },
+
+      // NEW: Allocate stat points manually
+      allocateStatPoint: (stat) => {
+        set((state) => {
+          if (!state.user || state.user.statPoints <= 0) return state;
+
+          return {
+            user: {
+              ...state.user,
+              statPoints: state.user.statPoints - 1,
+              stats: {
+                ...state.user.stats,
+                [stat]: state.user.stats[stat] + 1,
               },
             },
           };
@@ -173,8 +228,3 @@ export const useUserStore = create<UserState>()(
     }
   )
 );
-
-function getRandomStat(): keyof User['stats'] {
-  const stats: (keyof User['stats'])[] = ['strength', 'intelligence', 'agility', 'wisdom'];
-  return stats[Math.floor(Math.random() * stats.length)];
-}

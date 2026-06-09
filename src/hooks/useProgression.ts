@@ -6,8 +6,9 @@ export function useProgression() {
   const completeTask = useUserStore((state) => state.completeTask);
   const checkLevelUp = useUserStore((state) => state.checkLevelUp);
   
-  const handleTaskComplete = useCallback((taskId: string, xpReward: number) => {
-    completeTask(taskId, xpReward);
+  const handleTaskComplete = useCallback((taskId: string, xpReward: number, goldReward: number) => {
+    // Pass both XP and Gold to completeTask
+    completeTask(taskId, xpReward, goldReward);
     const levelUpResult = checkLevelUp();
     
     if (levelUpResult?.leveledUp) {
@@ -21,8 +22,8 @@ export function useProgression() {
 
   useEffect(() => {
     const handleTaskCompleted = (event: CustomEvent) => {
-      const { taskId, xpReward } = event.detail;
-      handleTaskComplete(taskId, xpReward);
+      const { taskId, xpReward, goldReward } = event.detail;
+      handleTaskComplete(taskId, xpReward, goldReward);
     };
 
     window.addEventListener('task-completed', handleTaskCompleted as EventListener);

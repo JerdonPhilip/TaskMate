@@ -7,9 +7,11 @@ export interface User {
   level: number;
   currentXP: number;
   totalXP: number;
+  gold: number;
   class: CharacterClass;
   title: Title;
   stats: UserStats;
+  statPoints: number; // ADD THIS - Available stat points to allocate
   achievements: Achievement[];
   questsCompleted: number;
   questsFailed: number;

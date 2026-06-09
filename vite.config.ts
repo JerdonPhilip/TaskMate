@@ -10,7 +10,10 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  base: '/rpg-quest-board/', // Replace with your GitHub repo name for GitHub Pages
+  // Remove or change the base for local development
+  // For local dev, use '/' 
+  // For GitHub Pages, use '/taskmate/' (your repo name)
+  base: '/',
   build: {
     outDir: 'dist',
     sourcemap: true,
