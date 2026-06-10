@@ -13,7 +13,7 @@ export default defineConfig({
   // Remove or change the base for local development
   // For local dev, use '/' 
   // For GitHub Pages, use '/taskmate/' (your repo name)
-  base: '/',
+  base: '/TaskMate/',
   build: {
     outDir: 'dist',
     sourcemap: true,
