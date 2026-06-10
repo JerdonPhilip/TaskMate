@@ -331,21 +331,21 @@ export const generateDungeonScenario = async (
   const choices: DungeonChoice[] = [
     {
       id: '1',
-      text: getChoiceText('strength', challenge.text),
+      text: getChoiceText('strength'),
       risk: 'high',
       successChance: calculateSuccessChance('high', 5, playerLevel, difficulty),
       statBonus: 'strength',
     },
     {
       id: '2',
-      text: getChoiceText('intelligence', challenge.text),
+      text: getChoiceText('intelligence'),
       risk: 'medium',
       successChance: calculateSuccessChance('medium', 5, playerLevel, difficulty),
       statBonus: 'intelligence',
     },
     {
       id: '3',
-      text: getChoiceText('agility', challenge.text),
+      text: getChoiceText('agility'),
       risk: 'low',
       successChance: calculateSuccessChance('low', 5, playerLevel, difficulty),
       statBonus: 'agility',
