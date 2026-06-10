@@ -24,6 +24,10 @@ import { QuestComplete } from '../animations/QuestComplete';
 import { DataManager } from '../layout/DataManager';
 import { BackupReminder } from '../layout/BackupReminder';
 import { NotificationSystem } from '../ui/Notification';
+import { DungeonExplorer } from '../dungeon/DungeonExplorer';
+import { InventoryModal } from '../inventory/InventoryModal';
+import { ShopModal } from '../shop/ShopModal';
+import { useInventoryStore } from '../../stores/useInventoryStore';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const COLUMNS: { 
@@ -67,10 +71,14 @@ export const KanbanBoard: React.FC = () => {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [showQuestForm, setShowQuestForm] = useState(false);
   const [showDataManager, setShowDataManager] = useState(false);
+  const [showDungeonExplorer, setShowDungeonExplorer] = useState(false);
+  const [showInventory, setShowInventory] = useState(false);
+  const [showShop, setShowShop] = useState(false);
   
   const tasks = useTaskStore((state) => state.tasks);
   const moveTask = useTaskStore((state) => state.moveTask);
   const completeTask = useTaskStore((state) => state.completeTask);
+  const inventoryCount = useInventoryStore((state) => state.getInventoryCount());
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -139,7 +147,54 @@ export const KanbanBoard: React.FC = () => {
             </p>
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            {/* Dungeon Explorer Button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowDungeonExplorer(true)}
+              className="relative bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 
+                       hover:to-pink-700 text-white px-4 py-3 rounded-lg font-bold text-sm 
+                       transition-all shadow-lg border border-purple-400 group"
+              title="Explore Dungeons"
+            >
+              <span className="text-lg">🗺️</span>
+              <span className="hidden sm:inline ml-1">Dungeon</span>
+            </motion.button>
+
+            {/* Shop Button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowShop(true)}
+              className="bg-gradient-to-r from-yellow-600 to-amber-600 hover:from-yellow-700 
+                       hover:to-amber-700 text-white px-4 py-3 rounded-lg font-bold text-sm 
+                       transition-all shadow-lg border border-yellow-400"
+              title="Potion Shop"
+            >
+              <span className="text-lg">🏪</span>
+              <span className="hidden sm:inline ml-1">Shop</span>
+            </motion.button>
+
+            {/* Inventory Button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowInventory(true)}
+              className="relative bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 
+                       hover:to-teal-700 text-white px-4 py-3 rounded-lg font-bold text-sm 
+                       transition-all shadow-lg border border-emerald-400"
+              title="Inventory"
+            >
+              <span className="text-lg">🎒</span>
+              {inventoryCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] 
+                               font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  {inventoryCount > 99 ? '99+' : inventoryCount}
+                </span>
+              )}
+            </motion.button>
+
             {/* Data Management Button */}
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -147,12 +202,10 @@ export const KanbanBoard: React.FC = () => {
               onClick={() => setShowDataManager(true)}
               className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 
                        hover:to-indigo-700 text-white px-4 py-3 rounded-lg font-bold text-sm 
-                       transition-all shadow-lg border border-blue-400 relative group"
+                       transition-all shadow-lg border border-blue-400"
               title="Backup & Restore Data"
             >
-              <span className="text-xl">💾</span>
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full 
-                             animate-pulse hidden group-hover:block"></span>
+              <span className="text-lg">💾</span>
             </motion.button>
             
             {/* New Quest Button */}
@@ -278,10 +331,9 @@ export const KanbanBoard: React.FC = () => {
         </DndContext>
 
         {/* Footer Tips */}
-        <div className="mt-8 px-4 text-center">
+        <div className="mt-2 px-4 text-center">
           <p className="text-xs text-gray-600">
-            💡 Tip: Drag quests between columns • Click 💾 to backup your progress • 
-            Your data is saved automatically in this browser
+            💡 Drag quests between columns • 🗺️ Explore dungeons • 🏪 Buy potions • 🎒 View inventory • 💾 Backup
           </p>
         </div>
       </div>
@@ -297,6 +349,25 @@ export const KanbanBoard: React.FC = () => {
       <DataManager 
         isOpen={showDataManager} 
         onClose={() => setShowDataManager(false)} 
+      />
+
+      {/* Dungeon Explorer Modal */}
+      <AnimatePresence>
+        {showDungeonExplorer && (
+          <DungeonExplorer onClose={() => setShowDungeonExplorer(false)} />
+        )}
+      </AnimatePresence>
+
+      {/* Inventory Modal */}
+      <InventoryModal 
+        isOpen={showInventory} 
+        onClose={() => setShowInventory(false)} 
+      />
+
+      {/* Shop Modal */}
+      <ShopModal 
+        isOpen={showShop} 
+        onClose={() => setShowShop(false)} 
       />
 
       {/* Backup Reminder */}

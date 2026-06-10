@@ -63,7 +63,7 @@ export const BackupPreviewModal: React.FC<BackupPreviewModalProps> = ({
             className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl border-2 
                      border-amber-500/50 p-5 max-w-sm w-full shadow-2xl max-h-[90vh] overflow-y-auto"
           >
-            {/* Header - Compact */}
+            {/* Header */}
             <div className="text-center mb-4">
               <motion.div
                 animate={{ scale: [1, 1.1, 1] }}
@@ -80,7 +80,7 @@ export const BackupPreviewModal: React.FC<BackupPreviewModalProps> = ({
               </p>
             </div>
 
-            {/* Warning - Compact */}
+            {/* Warning */}
             <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-2.5 mb-3">
               <div className="flex items-start gap-2">
                 <span className="text-red-400 text-sm">⚠️</span>
@@ -93,7 +93,7 @@ export const BackupPreviewModal: React.FC<BackupPreviewModalProps> = ({
               </div>
             </div>
 
-            {/* Character Info - Compact Grid */}
+            {/* Character Info */}
             <div className="bg-gray-700/50 rounded-lg p-3 mb-3">
               <div className="flex items-center gap-3 mb-2">
                 <span className="text-3xl">{classIcon}</span>
@@ -124,7 +124,7 @@ export const BackupPreviewModal: React.FC<BackupPreviewModalProps> = ({
               </div>
             </div>
 
-            {/* Quest Stats - Compact */}
+            {/* Quest Stats */}
             <div className="bg-gray-700/50 rounded-lg p-3 mb-3">
               <h3 className="text-xs font-bold text-gray-300 mb-2">Quest Breakdown</h3>
               <div className="grid grid-cols-2 gap-2 mb-2">
@@ -161,15 +161,19 @@ export const BackupPreviewModal: React.FC<BackupPreviewModalProps> = ({
               </div>
             </div>
 
-            {/* Backup Date - Compact */}
+            {/* Backup Date */}
             <div className="bg-gray-700/30 rounded-lg p-2.5 mb-4">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-gray-400">📅 Backup Date</span>
                 <span className="text-white font-semibold">{backupData.backupDate}</span>
               </div>
+              <div className="flex items-center justify-between text-xs mt-2">
+                <span className="text-gray-400">🔒 Security</span>
+                <span className="text-green-400 font-semibold text-[10px]">Encrypted</span>
+              </div>
             </div>
 
-            {/* Action Buttons - Compact */}
+            {/* Action Buttons */}
             <div className="flex gap-2">
               <button
                 onClick={onClose}

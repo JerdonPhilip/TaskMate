@@ -11,11 +11,16 @@ export interface User {
   class: CharacterClass;
   title: Title;
   stats: UserStats;
-  statPoints: number; // ADD THIS - Available stat points to allocate
+  statPoints: number;
   achievements: Achievement[];
   questsCompleted: number;
   questsFailed: number;
   streaks: StreakData;
+  // NEW - HP and Mana
+  currentHP: number;
+  maxHP: number;
+  currentMana: number;
+  maxMana: number;
 }
 
 export interface UserStats {

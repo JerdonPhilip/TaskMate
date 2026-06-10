@@ -42,4 +42,14 @@
         transform: translateY(2px);
         box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.4);
     }
+
+    /* Hide scrollbar utility class */
+    .scrollbar-none {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .scrollbar-none::-webkit-scrollbar {
+        display: none;
+    }
 }

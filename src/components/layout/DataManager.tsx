@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { exportData, importData, checkLastBackup, getDataStats, clearAllData } from '../../utils/dataManager';
+import { exportData, importData, checkLastBackup, getDataStats, clearAllData, migrateToEncryptedStorage } from '../../utils/dataManager';
 
 interface DataManagerProps {
   isOpen: boolean;
@@ -12,6 +12,8 @@ export const DataManager: React.FC<DataManagerProps> = ({ isOpen, onClose }) => 
   const [stats, setStats] = useState(getDataStats());
   const [daysSinceBackup, setDaysSinceBackup] = useState(0);
   const [isImporting, setIsImporting] = useState(false);
+  const [isEncrypting, setIsEncrypting] = useState(false);
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -24,11 +26,20 @@ export const DataManager: React.FC<DataManagerProps> = ({ isOpen, onClose }) => 
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file type
+    if (!file.name.endsWith('.json') && !file.name.endsWith('.tmenc')) {
+      setMessage('❌ Please select a valid backup file (.json or .tmenc)');
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+
     setIsImporting(true);
     try {
       await importData(file);
     } catch (error) {
       console.error('Import failed:', error);
+      setMessage('❌ Failed to import backup file');
+      setTimeout(() => setMessage(''), 3000);
     } finally {
       setIsImporting(false);
       if (fileInputRef.current) {
@@ -41,6 +52,28 @@ export const DataManager: React.FC<DataManagerProps> = ({ isOpen, onClose }) => 
     exportData();
     setDaysSinceBackup(0);
     setStats(getDataStats());
+    setMessage('✅ Encrypted backup exported!');
+    setTimeout(() => setMessage(''), 3000);
+  };
+
+  const handleEncryptData = () => {
+    setIsEncrypting(true);
+    try {
+      migrateToEncryptedStorage();
+      setMessage('✅ All data encrypted successfully!');
+      setTimeout(() => {
+        setMessage('');
+        setIsEncrypting(false);
+      }, 2000);
+    } catch (error) {
+      setMessage('❌ Encryption failed');
+      setIsEncrypting(false);
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+
+  const handleClearData = () => {
+    clearAllData();
   };
 
   return (
@@ -68,7 +101,7 @@ export const DataManager: React.FC<DataManagerProps> = ({ isOpen, onClose }) => 
                 <h2 className="text-2xl font-bold text-yellow-400 flex items-center gap-2">
                   💾 Data Management
                 </h2>
-                <p className="text-gray-400 text-sm mt-1">Backup & restore your progress</p>
+                <p className="text-gray-400 text-sm mt-1">Backup, restore & secure your progress</p>
               </div>
               <button
                 onClick={onClose}
@@ -77,6 +110,21 @@ export const DataManager: React.FC<DataManagerProps> = ({ isOpen, onClose }) => 
                 ✕
               </button>
             </div>
+
+            {/* Message */}
+            {message && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`p-3 rounded-lg mb-4 text-sm font-bold text-center ${
+                  message.includes('✅') ? 'bg-green-500/20 text-green-400' :
+                  message.includes('❌') ? 'bg-red-500/20 text-red-400' :
+                  'bg-blue-500/20 text-blue-400'
+                }`}
+              >
+                {message}
+              </motion.div>
+            )}
 
             {/* Backup Status */}
             {daysSinceBackup > 0 && (
@@ -131,15 +179,14 @@ export const DataManager: React.FC<DataManagerProps> = ({ isOpen, onClose }) => 
               </div>
             </div>
 
-            {/* Warning */}
-            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mb-4">
-              <h4 className="text-blue-400 font-semibold text-sm mb-1">💡 Important Information</h4>
+            {/* Security Info */}
+            <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3 mb-4">
+              <h4 className="text-purple-400 font-bold text-sm mb-1">🔒 Security Information</h4>
               <ul className="text-xs text-gray-300 space-y-1">
-                <li>• Data is stored in your browser's localStorage</li>
-                <li>• Clearing browser data will delete ALL progress</li>
-                <li>• Data does NOT sync across devices</li>
-                <li>• Create regular backups to prevent data loss</li>
-                <li>• Backup files can be used to restore progress</li>
+                <li>• Backups are encrypted with salt protection</li>
+                <li>• Files cannot be edited with text editors</li>
+                <li>• Checksums prevent data tampering</li>
+                <li>• Supports both .json (legacy) and .tmenc (encrypted) files</li>
               </ul>
             </div>
 
@@ -153,7 +200,7 @@ export const DataManager: React.FC<DataManagerProps> = ({ isOpen, onClose }) => 
                          text-white font-bold py-3 px-4 rounded-lg
                          transition-all shadow-lg flex items-center justify-center gap-2"
               >
-                📥 Export Backup File
+                📥 Export Encrypted Backup (.tmenc)
               </button>
 
               {/* Import Button */}
@@ -161,7 +208,7 @@ export const DataManager: React.FC<DataManagerProps> = ({ isOpen, onClose }) => 
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".json"
+                  accept=".json,.tmenc"
                   onChange={handleFileSelect}
                   className="hidden"
                   id="backup-file-input"
@@ -175,11 +222,24 @@ export const DataManager: React.FC<DataManagerProps> = ({ isOpen, onClose }) => 
                            text-white font-bold py-3 px-4 rounded-lg
                            transition-all shadow-lg flex items-center justify-center gap-2"
                 >
-                  {isImporting ? '⏳ Importing...' : '📤 Import Backup File'}
+                  {isImporting ? '⏳ Importing...' : '📤 Import Backup (.json or .tmenc)'}
                 </button>
               </div>
 
-              {/* Auto-Backup Reminder Toggle */}
+              {/* Encrypt Data Button */}
+              <button
+                onClick={handleEncryptData}
+                disabled={isEncrypting}
+                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 
+                         hover:from-purple-700 hover:to-indigo-700
+                         disabled:from-gray-700 disabled:to-gray-700
+                         text-white font-bold py-3 px-4 rounded-lg
+                         transition-all shadow-lg flex items-center justify-center gap-2"
+              >
+                {isEncrypting ? '⏳ Encrypting...' : '🔒 Encrypt Saved Data'}
+              </button>
+
+              {/* Auto-Backup Reminder */}
               <div className="bg-gray-700/30 rounded-lg p-3">
                 <label className="flex items-center justify-between cursor-pointer">
                   <span className="text-sm text-gray-300">
@@ -198,7 +258,7 @@ export const DataManager: React.FC<DataManagerProps> = ({ isOpen, onClose }) => 
 
               {/* Clear Data Button */}
               <button
-                onClick={clearAllData}
+                onClick={handleClearData}
                 className="w-full bg-red-600/20 hover:bg-red-600/30 
                          text-red-400 font-bold py-3 px-4 rounded-lg
                          transition-all border border-red-500/30"

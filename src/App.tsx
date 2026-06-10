@@ -6,6 +6,7 @@ import { CharacterClass } from './types/user';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CLASS_CONFIGS } from './utils/classStats';
 import { BackupPreviewModal } from './components/layout/BackupPreviewModal';
+import { useGoldSync } from './hooks/useGoldSync';
 
 const CHARACTER_CLASSES = [
   { 
@@ -41,6 +42,7 @@ const CHARACTER_CLASSES = [
 function App() {
   useProgression();
   const user = useUserStore((state) => state.user);
+  useGoldSync();
   const initializeUser = useUserStore((state) => state.initializeUser);
   const resetCharacter = useUserStore((state) => state.resetCharacter);
   
@@ -159,20 +161,6 @@ function App() {
     if (characterName.trim() && characterName.length >= 2) {
       initializeUser(characterName.trim(), selectedClass);
       setShowCharacterCreation(false);
-    }
-  };
-
-  const handleResetCharacter = () => {
-    if (confirm('⚠️ Are you sure you want to delete your character and ALL progress? This cannot be undone!')) {
-      if (confirm('🗑️ Final warning: All quests, gold, and levels will be lost forever!')) {
-        localStorage.removeItem('taskmate-user');
-        localStorage.removeItem('taskmate-tasks');
-        localStorage.removeItem('taskmate-last-backup');
-        resetCharacter();
-        setCharacterName('');
-        setSelectedClass('warrior');
-        setShowCharacterCreation(true);
-      }
     }
   };
 
@@ -469,15 +457,6 @@ function App() {
             </div>
           </div>
 
-          {/* Existing Data Notice - Compact */}
-          {hasExistingData && !user && (
-            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-2 mb-4">
-              <p className="text-yellow-400 text-xs">
-                ⚠️ Existing data found. Creating a new character will overwrite it.
-              </p>
-            </div>
-          )}
-
           {/* Form - Compact Spacing */}
           <div className="space-y-4">
             {/* Character Name */}
@@ -537,7 +516,7 @@ function App() {
                         </div>
                       )}
                       
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-end gap-2">
                         <span className="text-2xl">{charClass.icon}</span>
                         <div className="flex-1 min-w-0">
                           <h3 className="font-bold text-white text-xs mb-0.5 truncate">
@@ -635,18 +614,6 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-900">
       <KanbanBoard />
-      
-      {user && (
-        <button
-          onClick={handleResetCharacter}
-          className="fixed bottom-4 right-4 z-40 bg-red-600/20 hover:bg-red-600/40 
-                   text-red-400 text-xs font-bold px-3 py-2 rounded-lg 
-                   border border-red-500/30 transition-all"
-          title="Reset Character"
-        >
-          🔄 Reset
-        </button>
-      )}
     </div>
   );
 }
