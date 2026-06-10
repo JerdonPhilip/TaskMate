@@ -100,7 +100,7 @@ export const BackupPreviewModal: React.FC<BackupPreviewModalProps> = ({
                 <div>
                   <div className="text-white font-bold text-sm">{backupData.userName}</div>
                   <div className="text-gray-400 text-xs">
-                    {backupData.userClass?.charAt(0).toUpperCase() + backupData.userClass?.slice(1)} • 
+                    {backupData.userClass ? backupData.userClass.charAt(0).toUpperCase() + backupData.userClass.slice(1) : 'Unknown'} •
                     Level {backupData.userLevel}
                   </div>
                 </div>

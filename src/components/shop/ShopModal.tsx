@@ -15,7 +15,6 @@ export const ShopModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
   const addItem = useInventoryStore((state) => state.addItem);
   const removeItem = useInventoryStore((state) => state.removeItem);
   
-  const [selectedPotion, setSelectedPotion] = useState<Potion | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [message, setMessage] = useState('');
   const [activeTab, setActiveTab] = useState<'buy' | 'use'>('buy');

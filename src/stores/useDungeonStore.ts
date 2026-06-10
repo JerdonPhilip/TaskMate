@@ -49,7 +49,7 @@ export const useDungeonStore = create<DungeonState>()(
       totalDungeonsExplored: 0,
       totalBossesDefeated: 0,
       
-      startExploration: async (dungeonId, playerLevel, playerClass, stats) => {
+      startExploration: async (dungeonId, playerLevel, _playerClass, _stats) => {
         const dungeon = DUNGEON_TYPES.find(d => d.id === dungeonId);
         if (!dungeon) return;
         
@@ -58,7 +58,7 @@ export const useDungeonStore = create<DungeonState>()(
         try {
           const scenario = await generateDungeonScenario(
             playerLevel,
-            playerClass,
+            _playerClass,
             dungeon.name
           );
           

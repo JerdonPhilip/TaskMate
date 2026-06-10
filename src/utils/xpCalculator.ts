@@ -1,4 +1,4 @@
-import { TaskDifficulty } from '../types/task';
+import { TaskDifficulty } from '../types/types';
 
 export const XP_BASE_VALUES = {
   trivial: 5,

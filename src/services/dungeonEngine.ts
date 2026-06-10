@@ -303,7 +303,7 @@ const calculateRewards = (
 
 export const generateDungeonScenario = async (
   playerLevel: number,
-  playerClass: string,
+  _playerClass: string,
   dungeonName: string
 ): Promise<DungeonScenario> => {
   // Small delay for dramatic effect
@@ -366,7 +366,7 @@ export const generateDungeonScenario = async (
   };
 };
 
-const getChoiceText = (approach: string, challenge: string): string => {
+const getChoiceText = (approach: string): string => {
   const texts: Record<string, string> = {
     strength: `Face it head-on with raw power!`,
     intelligence: `Analyze the situation and find a clever solution`,

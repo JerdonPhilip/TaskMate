@@ -93,14 +93,13 @@ export const useUserStore = create<UserState>()(
         }
       },
 
-      addXP: (amount, source, taskId) => {
+      addXP: (amount, _source, _taskId) => {
         set((state) => {
           if (!state.user) return state;
 
           const newTotalXP = state.user.totalXP + amount;
           const newCurrentXP = state.user.currentXP + amount;
           const newLevel = getLevelForXP(newTotalXP);
-          const leveledUp = newLevel > state.user.level;
           const levelsGained = newLevel - state.user.level;
           const newStatPoints = levelsGained > 0 ? state.user.statPoints + (levelsGained * 2) : state.user.statPoints;
 
@@ -136,7 +135,7 @@ export const useUserStore = create<UserState>()(
         });
       },
 
-      completeTask: (taskId, xpReward, goldReward) => {
+      completeTask: (_taskId, xpReward, goldReward) => {
         set((state) => {
           if (!state.user) return state;
 
@@ -352,8 +351,3 @@ export const useUserStore = create<UserState>()(
     }
   )
 );
-
-function getRandomStat(): keyof User['stats'] {
-  const stats: (keyof User['stats'])[] = ['strength', 'intelligence', 'agility', 'wisdom'];
-  return stats[Math.floor(Math.random() * stats.length)];
-}

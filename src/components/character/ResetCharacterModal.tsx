@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUserStore } from '../../stores/useUserStore';
 import { useTaskStore } from '../../stores/useTaskStore';
-import { useDungeonStore } from '../../stores/useDungeonStore';
 
 interface ResetCharacterModalProps {
   isOpen: boolean;

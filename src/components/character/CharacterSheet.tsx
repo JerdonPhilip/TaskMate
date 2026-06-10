@@ -4,7 +4,7 @@ import { useUserStore } from '../../stores/useUserStore';
 import { useInventoryStore } from '../../stores/useInventoryStore';
 import { StatAllocation } from './StatAllocation';
 import { ResetCharacterModal } from './ResetCharacterModal';
-import { CLASS_CONFIGS, getStatIcon, getStatColor } from '../../utils/classStats';
+import { CLASS_CONFIGS, getStatIcon } from '../../utils/classStats';
 
 export const CharacterSheet: React.FC = () => {
   const user = useUserStore((state) => state.user);

@@ -1,4 +1,4 @@
-import { UserStats, User } from '../types/user';
+import { UserStats } from '../types/user';
 
 export const calculateMaxHP = (strength: number, level: number): number => {
   return (strength * 10) + (level * 5);

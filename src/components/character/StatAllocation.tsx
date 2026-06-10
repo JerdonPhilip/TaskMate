@@ -116,7 +116,6 @@ export const StatAllocation: React.FC<StatAllocationProps> = ({ isOpen, onClose 
             {/* Stat Bars */}
             <div className="space-y-4 mb-6">
               {statBars.map(({ stat, label }) => {
-                const baseValue = user.stats[stat];
                 const allocatedValue = allocatedStats[stat] || 0;
                 const currentValue = currentStats[stat];
                 const isPrimary = stat === classConfig.primaryStat;

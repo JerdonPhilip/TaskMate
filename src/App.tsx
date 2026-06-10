@@ -44,7 +44,6 @@ function App() {
   const user = useUserStore((state) => state.user);
   useGoldSync();
   const initializeUser = useUserStore((state) => state.initializeUser);
-  const resetCharacter = useUserStore((state) => state.resetCharacter);
   
   const [showCharacterCreation, setShowCharacterCreation] = useState(false);
   const [characterName, setCharacterName] = useState('');
